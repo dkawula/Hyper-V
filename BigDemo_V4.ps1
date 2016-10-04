@@ -1,4 +1,6 @@
 ﻿# Parameters
+ # Huge Thank you to Ben Armstrong @VirtualPCGuy for giving me the source starter code for this :)
+ 
 $workingDir = "D:\DCBuild"
 $BaseVHDPath = "$($workingDir)\BaseVHDs"
 $VMPath = "$($workingDir)\VMs"
