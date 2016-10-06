@@ -222,109 +222,114 @@ $vmnetAdapter_Internet2 = Add-VMNetworkAdapter -VMName $router_HV -SwitchName $V
 Write-Host "Adding a 8th Network Adapter to $router_HV" -ForegroundColor Yellow 
 $vmnetAdapter_InternetDHPCPRelay2 = Add-VMNetworkAdapter -VMName $router_HV -SwitchName $VSwitch_Internet2 -StaticMacAddress '00:00:00:00:00:08'
 
-Write-Host "Adding a 9th Network Adapter to $router_HV" -ForegroundColor Yellow 
-$vmnetAdapter_DMZ2 = Add-VMNetworkAdapter -VMName $router_HV -SwitchName $VSwitch_DMZ2 -IsLegacy $true -StaticMacAddress '00:00:00:00:00:09'
+#Write-Host "Adding a 9th Network Adapter to $router_HV" -ForegroundColor Yellow 
+#$vmnetAdapter_DMZ2 = Add-VMNetworkAdapter -VMName $router_HV -SwitchName $VSwitch_DMZ2 -IsLegacy $true -StaticMacAddress '00:00:00:00:00:09'
 
 Write-Host "Starting $Router_HV" -ForegroundColor Yellow 
 $vm = Start-VM -Name $router_HV 
 Wait-Sleep 30 "Waiting to start......Be Patient" 
 
-# Change the Default GW Settings on the 1st NIC of $Router 
 
-Write-Host "Ethernet on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-WmiObject win32_networkadapter | Where-Object {$_.MacAddress -eq '00:00:00:00:00:01'} | remove-netroute -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the Default GW Settings on the 1st NIC of $VMName 
+
+Write-Host "Ethernet on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-WmiObject win32_networkadapter | Where-Object {$_.MacAddress -eq '00:00:00:00:00:01'} | remove-netroute -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 Write-Host "Renaming 1st NIC to CorpNet" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-01'} | Rename-NetAdapter -NewName "CorpNet"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-01'} | Rename-NetAdapter -NewName "CorpNet"}
 Write-Host "Renaming 2st NIC to DRNet" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-02'} | Rename-NetAdapter -NewName "DRNet"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-02'} | Rename-NetAdapter -NewName "DRNet"}
 Write-Host "Renaming 3rd NIC to Internet" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-03'} | Rename-NetAdapter -NewName "Internet"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-03'} | Rename-NetAdapter -NewName "Internet"}
 Write-Host "Renaming 4th NIC to DHCP Relay" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-04'} | Rename-NetAdapter -NewName "DHCPRelay"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-04'} | Rename-NetAdapter -NewName "DHCPRelay"}
 Write-Host "Renaming 5st NIC to FSWSite" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-05'} | Rename-NetAdapter -NewName "FSWSite"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-05'} | Rename-NetAdapter -NewName "FSWSite"}
 Write-Host "Renaming 6th NIC to DMZ" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-06'} | Rename-NetAdapter -NewName "DMZ"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-06'} | Rename-NetAdapter -NewName "DMZ"}
 Write-Host "Renaming 7th NIC to Internet2" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-07'} | Rename-NetAdapter -NewName "Internet2"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-07'} | Rename-NetAdapter -NewName "Internet2"}
 Write-Host "Renaming 8th NIC to DHCP Relay 2" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-08'} | Rename-NetAdapter -NewName "DHCPRelay2"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-08'} | Rename-NetAdapter -NewName "DHCPRelay2"}
 Write-Host "Renaming 9th NIC to DMZ2" -ForegroundColor Yellow
-$nicInfo = Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-09'} | Rename-NetAdapter -NewName "DMZ2"}
+$nicInfo = Invoke-Command -VMName $VMName -Credential $DomainCred  {Get-NetAdapter| Where-Object {$_.MacAddress -eq '00-00-00-00-00-09'} | Rename-NetAdapter -NewName "DMZ2"}
 
-# Change the IP Address of the newly added 2nd NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress to $Router's 'DRNet' Adapter for Internet Simulation" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress -ScriptBlock { Param($IPAddress) New-NetIpaddress -InterfaceAlias "DRNet" -IPAddress $IPAddress -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DRNet" -ServerAddresses $dnsServerIP} 
-Write-Host "DRNet on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "DRNet" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the IP Address of the newly added 2nd NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress to $VMName's 'DRNet' Adapter for Internet Simulation" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress  { Param($IPAddress) New-NetIpaddress -InterfaceAlias "DRNet" -IPAddress $IPAddress -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DRNet" -ServerAddresses $dnsServerIP} 
+Write-Host "DRNet on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "DRNet" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 
-# Change the IP Address of the newly added 3nd NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress_Internet to $Router's 'Internet' Adapter for Internet Simulation" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_Internet -ScriptBlock { Param($IPAddress_Internet) New-NetIpaddress -InterfaceAlias "Internet" -IPAddress $IPAddress_Internet -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "Internet" -ServerAddresses $dnsServerIP} 
-Write-Host "Internet on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "Internet" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the IP Address of the newly added 3nd NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress_Internet to $VMName's 'Internet' Adapter for Internet Simulation" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress_Internet  { Param($IPAddress_Internet) New-NetIpaddress -InterfaceAlias "Internet" -IPAddress $IPAddress_Internet -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "Internet" -ServerAddresses $dnsServerIP} 
+Write-Host "Internet on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "Internet" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 
-# Change the IP Address of the newly added 4th NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress_DHCPRelay to $Router's 'DHCPRelay' Adapter for Internet Simulation" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_DHCPRelay -ScriptBlock { Param($IPAddress_DHCPRelay) New-NetIpaddress -InterfaceAlias "DHCPRelay" -IPAddress $IPAddress_DHCPRelay -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DHCPRelay" -ServerAddresses $dnsServerIP} 
-Write-Host "DHCPRelay on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "DHCPRelay" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the IP Address of the newly added 4th NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress_DHCPRelay to $VMName's 'DHCPRelay' Adapter for Internet Simulation" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress_DHCPRelay  { Param($IPAddress_DHCPRelay) New-NetIpaddress -InterfaceAlias "DHCPRelay" -IPAddress $IPAddress_DHCPRelay -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DHCPRelay" -ServerAddresses $dnsServerIP} 
+Write-Host "DHCPRelay on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "DHCPRelay" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 
-# Change the IP Address of the newly added 5th NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress_CYL2 to $Router's 'FSWSite' Adapter for Internet Simulation" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_CYL2 -ScriptBlock { Param($IPAddress_CYL2) New-NetIpaddress -InterfaceAlias "FSWSite" -IPAddress $IPAddress_CYL2 -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "FSWSite" -ServerAddresses $dnsServerIP} 
-Write-Host "FSWSite on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "FSWSite" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the IP Address of the newly added 5th NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress_CYL2 to $VMName's 'FSWSite' Adapter for Internet Simulation" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress_CYL2  { Param($IPAddress_CYL2) New-NetIpaddress -InterfaceAlias "FSWSite" -IPAddress $IPAddress_CYL2 -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "FSWSite" -ServerAddresses $dnsServerIP} 
+Write-Host "FSWSite on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "FSWSite" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 
-# Change the IP Address of the newly added 6th NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress_DMZ to $Router's 'DMZ' Adapter for Internet Simulation" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_DMZ -ScriptBlock { Param($IPAddress_DMZ) New-NetIpaddress -InterfaceAlias "DMZ" -IPAddress $IPAddress_DMZ -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DMZ" -ServerAddresses $dnsServerIP} 
-Write-Host "DMZ on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "DMZ" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the IP Address of the newly added 6th NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress_DMZ to $VMName's 'DMZ' Adapter for Internet Simulation" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress_DMZ  { Param($IPAddress_DMZ) New-NetIpaddress -InterfaceAlias "DMZ" -IPAddress $IPAddress_DMZ -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DMZ" -ServerAddresses $dnsServerIP} 
+Write-Host "DMZ on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "DMZ" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 
-# Change the IP Address of the newly added 7th NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress_Internet2 to $Router's 'Internet2' Adapter for Internet Simulation" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_Internet2 -ScriptBlock { Param($IPAddress_Internet2) New-NetIpaddress -InterfaceAlias "Internet2" -IPAddress $IPAddress_Internet2 -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "Internet2" -ServerAddresses $dnsServerIP} 
-Write-Host "Internet2 on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "Internet2" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+# Change the IP Address of the newly added 7th NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress_Internet2 to $VMName's 'Internet2' Adapter for Internet Simulation" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress_Internet2  { Param($IPAddress_Internet2) New-NetIpaddress -InterfaceAlias "Internet2" -IPAddress $IPAddress_Internet2 -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "Internet2" -ServerAddresses $dnsServerIP} 
+Write-Host "Internet2 on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "Internet2" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
 
-# Change the IP Address of the newly added 8th NIC in $Router 
-Write-Host "Adding an IP Address of $IPAddress_DHCPRelay2 to $Router's 'DHCPRelay2' Adapter for Internet Simulation 2ND Site" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_DHCPRelay2 -ScriptBlock { Param($IPAddress_DHCPRelay2) New-NetIpaddress -InterfaceAlias "DHCPRelay2" -IPAddress $IPAddress_DHCPRelay2 -PrefixLength 24} 
-Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
-$nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DHCPRelay2" -ServerAddresses $dnsServerIP} 
-Write-Host "DHCPRelay2 on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
-$nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "DHCPRelay2" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
-
-# Change the IP Address of the newly added 9th NIC in $Router 
+# Change the IP Address of the newly added 8th NIC in $VMName 
+Write-Host "Adding an IP Address of $IPAddress_DHCPRelay2 to $VMName's 'DHCPRelay2' Adapter for Internet Simulation 2ND Site" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $IPAddress_DHCPRelay2  { Param($IPAddress_DHCPRelay2) New-NetIpaddress -InterfaceAlias "DHCPRelay2" -IPAddress $IPAddress_DHCPRelay2 -PrefixLength 24} 
+Write-Host "Setting Primary DNS on $VMName for Ethernet to pointing to $dc" -ForegroundColor Yellow 
+$nicinfo = Invoke-Command -VMName $VMName -Credential $DomainCred -ArgumentList $dnsServerIP  { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DHCPRelay2" -ServerAddresses $dnsServerIP} 
+Write-Host "DHCPRelay2 on $VMName does not require a Default GW, Removing it..." -ForegroundColor Yellow 
+$nicinfo =  Invoke-Command -VMName $VMName -Credential $DomainCred  {remove-netroute -interfacealias "DHCPRelay2" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
+<#>
+Can't do this as we can only add 8 nics
+ Change the IP Address of the newly added 9th NIC in $Router 
 Write-Host "Adding an IP Address of $IPAddress_DMZ2 to $Router's 'DMZ2' Adapter for DMZ Simulation 2ND Site" -ForegroundColor Yellow 
 $nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $IPAddress_DMZ2 -ScriptBlock { Param($IPAddress_DMZ2) New-NetIpaddress -InterfaceAlias "DMZ2" -IPAddress $IPAddress_DMZ2 -PrefixLength 24} 
 Write-Host "Setting Primary DNS on $router for Ethernet to pointing to $dc" -ForegroundColor Yellow 
 $nicinfo = Invoke-Command -ComputerName $router -Credential $Cred -ArgumentList $dnsServerIP -ScriptBlock { Param($dnsServerIP) Set-DnsClientServerAddress -Interfacealias "DMZ2" -ServerAddresses $dnsServerIP} 
 Write-Host "DMZ2 on $router does not require a Default GW, Removing it..." -ForegroundColor Yellow 
 $nicinfo =  Invoke-Command -ComputerName $router -Credential $Cred -ScriptBlock {remove-netroute -interfacealias "DMZ2" -destinationprefix 0.0.0.0/0 -ErrorAction SilentlyContinue -confirm:$false}
-
+</#>
 # Configure the DHCP Relay Agent on the Router
 Write-Host "Installing RRAS on $Router for NAT Routing and DHCP Relay...." -ForegroundColor Yellow 
 #Install-WindowsFeature -Name RemoteAccess,Routing,RSAT-RemoteAccess-Mgmt -Credential $Cred -ComputerName $Router  | Out-Null
 Invoke-Command -VMName $VMName -Credential $DomainCred {Install-WindowsFeature -Name RemoteAccess,Routing,RSAT-RemoteAccess -IncludeManagementTools} 
 Invoke-Command -VMName $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "ras set conf ENABLED" }
+
+Restart-DemoVM $VMName
+Wait-PSDirect $VMName
 Write-Host "Configuring RRAS Startup Type to Automatic" -ForegroundColor Yellow
-Invoke-Command -VMName $VMName -Credential $DomainCred -{ Set-Service -Name RemoteAccess -StartupType Automatic } 
+Invoke-Command -VMName $VMName -Credential $DomainCred -{ get-service ramgm* | Set-Service -StartupType Automatic } 
 Write-Host "Starting RRAS Service" -ForegroundColor Yellow
-Invoke-Command -VMName $VMNamer -Credential $DomainCred { Start-Service -Name RemoteAccess } 
+Invoke-Command -VMName $VMName -Credential $DomainCred { Start-Service -Name Ramgm* } 
 Write-Host "Installing RRAS DHCP Relay Component" -ForegroundColor Yellow
 Invoke-Command -VMName $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip relay install" } 
 Write-Host "Configuring DHCP Relay IP Address with $dhcpServerIP"
@@ -338,8 +343,8 @@ Write-Host "Adding File Share Witness Site's DHCP Relay" -ForegroundColor Yellow
 Invoke-Command -VMname $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip relay add interface ""FSWSite""" }
 Write-Host "Adding DMZ Site's DHCP Relay" -ForegroundColor Yellow
 Invoke-Command -VMname $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip relay add interface ""DMZ""" }
-Write-Host "Adding DMZ2 Site's DHCP Relay" -ForegroundColor Yellow
-Invoke-Command -VMName $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip relay add interface ""DMZ2""" }
+#Write-Host "Adding DMZ2 Site's DHCP Relay" -ForegroundColor Yellow
+#Invoke-Command -VMName $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip relay add interface ""DMZ2""" }
 Write-Host "Adding DHCPRelay2 Site's DHCP Relay" -ForegroundColor Yellow
 Invoke-Command -VMName $VMName -Credential $DomainCred { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip relay add interface ""DHCPRelay2""" }
 
@@ -355,8 +360,8 @@ Write-Host "Adding DMZ Adapter to Private NAT" -ForegroundColor Yellow
 Invoke-Command -VMName $VMName -Credential $DomainCred  { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip nat add interface ""DMZ""" }
 Write-Host "Adding CorpNet Adapter Private NAT" -ForegroundColor Yellow
 Invoke-Command -VMName $VMName -Credential $DomainCred  { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip nat add interface ""CorpNet""" }
-Write-Host "Adding DMZ2 Adapter Private NAT" -ForegroundColor Yellow
-Invoke-Command -VMName $VMName -Credential $DomainCred  { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip nat add interface ""DMZ2""" }
+#Write-Host "Adding DMZ2 Adapter Private NAT" -ForegroundColor Yellow
+#Invoke-Command -VMName $VMName -Credential $DomainCred  { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip nat add interface ""DMZ2""" }
 Write-Host "Adding Internet Adapter to Public Full NAT" -ForegroundColor Yellow
 Invoke-Command -VMName $VMName -Credential $DomainCred  { Start-Process -Wait:$true -FilePath "netsh" -ArgumentList "routing ip nat add interface ""Internet"" full" }
 Write-Host "Creating NAT Rule for 3389 to $DC" -ForegroundColor Yellow
@@ -1064,22 +1069,6 @@ Invoke-Command -VMName $VMName -Credential $localCred {
 
 Restart-DemoVM $VMName 
 
-$VMName = 'Internet Router'
-$GuestOSName = 'Router'
-$IPNumber = '248'
-
-Create-DemoVM $VMName $GuestOSName $IPNumber
-
-Invoke-Command -VMName $VMName -Credential $localCred {
-    param($VMName, $domainCred, $domainName)
-    Write-Output -InputObject "[$($VMName)]:: Joining domain as `"$($env:computername)`""
-    Add-Computer -DomainName $domainName -Credential $domainCred -ea SilentlyContinue
-} -ArgumentList $VMName, $domainCred, $domainName
-
-Restart-DemoVM $VMName
-Wait-PSDirect $VMName
-Build-Internet $VMName 
-
 $VMName = 'Deployment Server'
 $GuestOSName = 'MDT01'
 $IPNumber = '247'
@@ -1162,6 +1151,22 @@ Invoke-Command -VMName $VMName -Credential $domainCred {
 } -ArgumentList $VMName, $domainName, $Subnet, $IPNumber
 
 Restart-DemoVM $VMName
+
+$VMName = 'Internet Router'
+$GuestOSName = 'Router'
+$IPNumber = '248'
+
+Create-DemoVM $VMName $GuestOSName $IPNumber
+
+Invoke-Command -VMName $VMName -Credential $localCred {
+    param($VMName, $domainCred, $domainName)
+    Write-Output -InputObject "[$($VMName)]:: Joining domain as `"$($env:computername)`""
+    Add-Computer -DomainName $domainName -Credential $domainCred -ea SilentlyContinue
+} -ArgumentList $VMName, $domainCred, $domainName
+
+Restart-DemoVM $VMName
+Wait-PSDirect $VMName -cred $domainCred
+Build-Internet $VMName 
 
 $VMName = 'Domain Controller 2'
 $GuestOSName = 'DC2'
